@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudForge E2E — DevSecOps Project Documentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg: #F0F4F8;
+    --surface: #FFFFFF;
+    --surface2: #F7FAFC;
+    --border: #E2E8F0;
+    --text: #1A202C;
+    --muted: #718096;
+    --accent: #2D7D9A;
+    --accent2: #1A5276;
+    --green: #27AE60;
+    --amber: #E67E22;
+    --red: #E53E3E;
+    --purple: #6B46C1;
+    --teal: #0E9F6E;
+    --navy: #1A365D;
+    --code-bg: #1E2533;
+    --code-text: #A8C7FA;
+    --tag-bg: #EBF8FF;
+    --tag-text: #2B6CB0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #0F2027, #203A43, #2C5364);
+    color: white;
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(45,125,154,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(45,125,154,0.3);
+    border: 1px solid rgba(45,125,154,0.5);
+    color: #7EC8E3;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, #FFFFFF, #7EC8E3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.7);
+    font-size: 16px;
+    max-width: 600px;
+    margin-bottom: 28px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: #7EC8E3;
+    display: block;
+  }
+  .hero-stat .label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Nav */
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .nav-btn:hover { color: var(--accent); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Content */
+  .content { max-width: 1000px; margin: 0 auto; padding: 40px; }
+
+  .phase { display: none; }
+  .phase.active { display: block; }
+
+  /* Phase header */
+  .phase-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .phase-num {
+    background: var(--navy);
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .phase-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .phase-header p { color: var(--muted); font-size: 14px; }
+  .phase-badge {
+    margin-left: auto;
+    background: #DCFCE7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* Server cards */
+  .server-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .server-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    border-top: 3px solid var(--accent);
+  }
+  .server-card.jenkins { border-top-color: #E67E22; }
+  .server-card.sonar { border-top-color: #6B46C1; }
+  .server-card.nexus { border-top-color: #0E9F6E; }
+  .server-card.eks { border-top-color: #E53E3E; }
+  .server-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .server-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .server-ip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Steps */
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .step-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .step-header:hover { background: var(--surface2); }
+  .step-num {
+    background: var(--accent);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 14px; flex: 1; }
+  .step-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #DCFCE7;
+    color: #166534;
+  }
+  .step-status.warn { background: #FEF3C7; color: #92400E; }
+  .step-chevron {
+    color: var(--muted);
+    font-size: 14px;
+    transition: transform 0.2s;
+  }
+  .step-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .step-body.open { display: block; }
+  .step-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 14px 0 12px;
+    line-height: 1.7;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 12px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--code-text);
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .code-label {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .copy-btn {
+    position: absolute;
+    bottom: 8px; right: 10px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+  /* Output blocks */
+  .output-block {
+    background: #0D1117;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    border-left: 3px solid var(--green);
+  }
+  .output-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #3FB950;
+    line-height: 1.7;
+  }
+  .output-label {
+    font-size: 10px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Focus notes */
+  .focus-note {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-left: 4px solid #F59E0B;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #78350F;
+    line-height: 1.6;
+  }
+  .focus-note strong { color: #92400E; }
+
+  /* Error notes */
+  .error-note {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 4px solid #EF4444;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #7F1D1D;
+    line-height: 1.6;
+  }
+
+  /* Tags */
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .tag {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .tag.green { background: #DCFCE7; color: #166534; }
+  .tag.amber { background: #FEF3C7; color: #92400E; }
+  .tag.purple { background: #F3E8FF; color: #6B21A8; }
+  .tag.red { background: #FEE2E2; color: #991B1B; }
+
+  /* Section titles */
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0 12px;
+  }
+
+  /* Pipeline flow */
+  .pipeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: max-content;
+  }
+  .pipe-step {
+    background: var(--navy);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .pipe-step.done { background: var(--teal); }
+  .pipe-step.warn { background: var(--amber); }
+  .pipe-arrow {
+    color: var(--muted);
+    margin: 0 4px;
+    font-size: 16px;
+  }
+
+  /* Table */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .info-table th {
+    background: var(--surface2);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .info-table td:first-child { font-weight: 500; }
+  .info-table tr:last-child td { border-bottom: none; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #EDF2F7;
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #2D3748;
+  }
+
+  /* RCA cards */
+  .rca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .rca-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    border-top: 3px solid var(--red);
+  }
+  .rca-card.resolved { border-top-color: var(--teal); }
+  .rca-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .rca-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+  .rca-error { font-size: 12px; color: var(--red); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; background: #FEF2F2; padding: 4px 8px; border-radius: 4px; }
+  .rca-fix { font-size: 12px; color: var(--muted); }
+
+  /* Overview grid */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .overview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .overview-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .overview-icon { font-size: 28px; margin-bottom: 10px; }
+  .overview-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .overview-desc { font-size: 12px; color: var(--muted); }
+  .overview-check { color: var(--teal); font-size: 16px; margin-top: 8px; }
+
+  /* Endpoint cards */
+  .endpoint-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .endpoint-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .endpoint-name { font-weight: 600; font-size: 14px; min-width: 120px; }
+  .endpoint-url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); word-break: break-all; }
+  .endpoint-port { font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 20px; }
+    .hero h1 { font-size: 28px; }
+    .content { padding: 20px; }
+    .nav { padding: 0 16px; }
+    .phase-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">CLOUDFORGE E2E · DEVSECOPS PROJECT</div>
+  <h1>Complete DevSecOps<br>Pipeline Documentation</h1>
+  <p>End-to-end project from infrastructure provisioning to production deployment with security scanning, monitoring, and GitOps — running on AWS EKS.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">7</span><span class="label">Phases</span></div>
+    <div class="hero-stat"><span class="num">4</span><span class="label">EC2 Servers</span></div>
+    <div class="hero-stat"><span class="num">3</span><span class="label">EKS Nodes</span></div>
+    <div class="hero-stat"><span class="num">11</span><span class="label">Pipeline Stages</span></div>
+    <div class="hero-stat"><span class="num">8</span><span class="label">Issues Resolved</span></div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPhase('overview')">Overview</button>
+  <button class="nav-btn" onclick="showPhase('phase1')">Phase 1 — Infra</button>
+  <button class="nav-btn" onclick="showPhase('phase2')">Phase 2 — Jenkins</button>
+  <button class="nav-btn" onclick="showPhase('phase3')">Phase 3 — SonarQube & Nexus</button>
+  <button class="nav-btn" onclick="showPhase('phase4')">Phase 4 — EKS RBAC</button>
+  <button class="nav-btn" onclick="showPhase('phase5')">Phase 5 — CI Pipeline</button>
+  <button class="nav-btn" onclick="showPhase('phase6')">Phase 6 — CD & GitOps</button>
+  <button class="nav-btn" onclick="showPhase('phase7')">Phase 7 — Monitoring</button>
+  <button class="nav-btn" onclick="showPhase('rca')">RCA & Issues</button>
+</nav>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<div id="overview" class="phase active">
+  <div class="section-title">Project Architecture</div>
+  <div class="overview-grid">
+    <div class="overview-card" onclick="showPhase('phase1')">
+      <div class="overview-icon">🖥️</div>
+      <div class="overview-title">Infra Server</div>
+      <div class="overview-desc">AWS CLI · Terraform · Helm · eksctl · kubectl · EKS</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase2')">
+      <div class="overview-icon">🔧</div>
+      <div class="overview-title">Jenkins Server</div>
+      <div class="overview-desc">Java 21 · Jenkins · Docker · Trivy · kubectl</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase3')">
+      <div class="overview-icon">🔍</div>
+      <div class="overview-title">SonarQube & Nexus</div>
+      <div class="overview-desc">Code quality · Artifact storage · Docker containers</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase4')">
+      <div class="overview-icon">🔐</div>
+      <div class="overview-title">EKS RBAC</div>
+      <div class="overview-desc">SA · Role · RoleBinding · ClusterRole · Token</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase5')">
+      <div class="overview-icon">⚙️</div>
+      <div class="overview-title">CI Pipeline</div>
+      <div class="overview-desc">11 stages · Build · Scan · Sonar · Docker · Push</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase6')">
+      <div class="overview-icon">🚀</div>
+      <div class="overview-title">CD & GitOps</div>
+      <div class="overview-desc">ArgoCD · manifest.yaml · Auto deploy to EKS</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('phase7')">
+      <div class="overview-icon">📊</div>
+      <div class="overview-title">Monitoring</div>
+      <div class="overview-desc">Prometheus · Grafana · Node Exporter · Blackbox</div>
+      <div class="overview-check">✅ Complete</div>
+    </div>
+    <div class="overview-card" onclick="showPhase('rca')">
+      <div class="overview-icon">🩺</div>
+      <div class="overview-title">Issues & RCA</div>
+      <div class="overview-desc">8 issues resolved · Real-world troubleshooting</div>
+      <div class="overview-check">✅ All Fixed</div>
+    </div>
+  </div>
+
+  <div class="section-title">CI/CD Pipeline Flow</div>
+  <div class="pipeline">
+    <div class="pipeline-flow">
+      <div class="pipe-step done">Git Push</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Compile</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Test</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Trivy FS</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">SonarQube</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Quality Gate</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Build JAR</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Nexus Deploy</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Docker Build</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Trivy Image</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Docker Push</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Update Manifest</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">ArgoCD Deploy</div>
+    </div>
+  </div>
+
+  <div class="section-title">Live Endpoints</div>
+  <div class="endpoint-card">
+    <div class="endpoint-dot"></div>
+    <div class="endpoint-name">Jenkins</div>
+    <div class="endpoint-url">http://54.83.65.92:8080</div>
+    <div class="endpoint-port">Port 8080</div>
+  </div>
+  <div class="endpoint-card">
+    <div class="endpoint-dot"></div>
+    <div class="endpoint-name">SonarQube</div>
+    <div class="endpoint-url">http://3.89.255.48:9000</div>
+    <div class="endpoint-port">Port 9000</div>
+  </div>
+  <div class="endpoint-card">
+    <div class="endpoint-dot"></div>
+    <div class="endpoint-name">Nexus</div>
+    <div class="endpoint-url">http://34.207.149.11:8081</div>
+    <div class="endpoint-port">Port 8081</div>
+  </div>
+  <div class="endpoint-card">
+    <div class="endpoint-dot"></div>
+    <div class="endpoint-name">Prometheus</div>
+    <div class="endpoint-url">http://ae59922a8fa5c423387cd4a7739f903b-1773710415.us-east-1.elb.amazonaws.com:9090</div>
+    <div class="endpoint-port">Port 9090</div>
+  </div>
+  <div class="endpoint-card">
+    <div class="endpoint-dot"></div>
+    <div class="endpoint-name">Grafana</div>
+    <div class="endpoint-url">http://ab3048119f52b484db60442444b53a42-1750590644.us-east-1.elb.amazonaws.com</div>
+    <div class="endpoint-port">Port 80</div>
+  </div>
+
+  <div class="section-title">AWS Account & Infrastructure</div>
+  <table class="info-table">
+    <tr><th>Resource</th><th>Details</th></tr>
+    <tr><td>AWS Account</td><td><code>774088392047</code> — jay_revise</td></tr>
+    <tr><td>Region</td><td><code>us-east-1</code> (N. Virginia)</td></tr>
+    <tr><td>VPC</td><td><code>vpc-029a7be1539541450</code></td></tr>
+    <tr><td>Security Group</td><td><code>kubernetes_project</code> (sg-061401a89f4963d3e)</td></tr>
+    <tr><td>Key Pair</td><td><code>docker_2nd_key</code></td></tr>
+    <tr><td>EKS Cluster</td><td><code>devopsshack-cluster</code> · Kubernetes v1.35</td></tr>
+    <tr><td>EKS Nodes</td><td>3x <code>c7i-flex.large</code> — 2 vCPU, 4GB RAM each</td></tr>
+    <tr><td>Docker Hub</td><td><code>jayanchule0699/bankapp</code></td></tr>
+    <tr><td>GitHub CI Repo</td><td><code>Jayprakash-A06/mega_project_ci</code></td></tr>
+    <tr><td>GitHub CD Repo</td><td><code>Jayprakash-A06/mega_project_cd</code></td></tr>
+  </table>
+</div>
+
+<!-- PHASE 1 -->
+<div id="phase1" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">1</div>
+    <div>
+      <h2>Infra Server Setup</h2>
+      <p>Provisioning the infrastructure server with all required tools and creating the EKS cluster using Terraform</p>
+    </div>
+    <div class="phase-badge">✅ 8/8 Complete</div>
+  </div>
+
+  <div class="section-title">Server Details</div>
+  <div class="server-grid">
+    <div class="server-card">
+      <div class="server-title">Infra_server_1st</div>
+      <div class="server-ip">54.197.167.179</div>
+      <div class="server-info">
+        Instance: i-00941c045cb1c004c<br>
+        Type: c7i-flex.large<br>
+        OS: Ubuntu 26.04<br>
+        Private IP: 172.31.25.158<br>
+        AMI: ami-0b6d9d3d33ba97d99
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">System Update — sudo apt update</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">First step on any Ubuntu server — refresh package lists to ensure latest versions are available.</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>sudo apt update</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Output</div>
+        <pre>Hit:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu resolute InRelease
+Hit:2 http://security.ubuntu.com/ubuntu resolute-security InRelease
+Reading package lists... Done</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div class="step-title">AWS CLI Installation & Configuration</div>
+      <div class="step-status">✅ v2.35.9</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Install AWS CLI v2 to interact with AWS services from the infra server. Required for EKS cluster management and Terraform.</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Version Output</div>
+        <pre>aws-cli/2.35.9 Python/3.14.5 Linux/7.0.0-1006-aws exe/x86_64.ubuntu.26</pre>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — configure</span>
+        <pre>aws configure set default.region us-east-1
+aws configure set default.output json
+aws configure list</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Region and output format were left blank during initial <code>aws configure</code> — always set <code>region=us-east-1</code> and <code>output=json</code>. Access key <code>AKIA3IO2DPVXWTYGTSW5</code> — rotate before production use. Never paste credentials in chat or logs.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div class="step-title">Terraform Installation</div>
+      <div class="step-status">✅ v1.15.6</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Install Terraform via HashiCorp's official APT repository for EKS cluster provisioning.</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>sudo apt update && sudo apt install -y gnupg software-properties-common curl
+
+curl -fsSL https://apt.releases.hashicorp.com/gpg | \
+  sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+  https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+  sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+sudo apt update && sudo apt install terraform -y
+terraform --version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Output</div>
+        <pre>Terraform v1.15.6
+on linux_amd64</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">4</div>
+      <div class="step-title">Terraform Git Repo Setup</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Created GitHub repo <code>Jayprakash-A06/terraform_project</code> with all EKS infrastructure files.</div>
+      <div class="tags">
+        <span class="tag">main.tf</span>
+        <span class="tag">variable.tf</span>
+        <span class="tag">output.tf</span>
+        <span class="tag">rbac.md</span>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — clone & init</span>
+        <pre>git clone https://github.com/Jayprakash-A06/terraform_project.git
+cd terraform_project
+terraform init</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Init Output</div>
+        <pre>- Installing hashicorp/aws v6.51.0...
+- Installed hashicorp/aws v6.51.0 (signed by HashiCorp)
+Terraform has been successfully initialized!</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Changes made to original files:</strong><br>
+        • region: <code>ap-south-1</code> → <code>us-east-1</code><br>
+        • AZs: <code>ap-south-1a/1b</code> → <code>us-east-1a/1b</code><br>
+        • ssh_key_name: <code>DevOps-Shack</code> → <code>docker_2nd_key</code><br>
+        • instance_types: <code>t2.medium</code> → <code>c7i-flex.large</code><br>
+        • Always run <code>git pull</code> on infra server before <code>terraform apply</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">5</div>
+      <div class="step-title">EKS Cluster — terraform apply</div>
+      <div class="step-status">✅ Active</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Provisioned complete EKS infrastructure using Terraform. Resources created: VPC, Subnets, IGW, Route Table, Security Groups, IAM Roles, EKS Cluster, Node Group (3x c7i-flex.large).</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>terraform destroy -auto-approve   # clean previous failed state
+terraform apply -auto-approve</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Key Resources Created</div>
+        <pre>aws_vpc.devopsshack_vpc                    ✓
+aws_subnet.devopsshack_subnet[0,1]         ✓
+aws_internet_gateway.devopsshack_igw       ✓
+aws_security_group.devopsshack_cluster_sg  ✓
+aws_security_group.devopsshack_node_sg     ✓
+aws_iam_role.devopsshack_cluster_role      ✓
+aws_iam_role.devopsshack_node_group_role   ✓
+aws_eks_cluster.devopsshack                ✓  [7m42s]
+aws_eks_node_group.devopsshack             ✓  [3m18s]
+aws_eks_addon.ebs_csi_driver               ✓  ACTIVE</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Never interrupt <code>terraform apply</code> mid-run — EKS node group takes 15-30 mins. Use <code>tmux</code> to avoid accidental Ctrl+C. <code>t2.medium</code> failed due to account restrictions — changed to <code>c7i-flex.large</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">6</div>
+      <div class="step-title">EBS CSI Driver — OIDC Setup</div>
+      <div class="step-status">✅ Active</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">EBS CSI addon was DEGRADED because it needs an OIDC provider + dedicated IAM role. Fixed by creating OIDC provider and attaching AmazonEBSCSIDriverPolicy.</div>
+      <div class="code-block">
+        <span class="code-label">bash — OIDC setup</span>
+        <pre># Get OIDC issuer
+aws eks describe-cluster --name devopsshack-cluster \
+  --region us-east-1 \
+  --query "cluster.identity.oidc.issuer" --output text
+# Result: https://oidc.eks.us-east-1.amazonaws.com/id/56FCEDD35282D4AF2C066D27378C8236
+
+# Create OIDC provider
+aws iam create-open-id-connect-provider \
+  --url https://oidc.eks.us-east-1.amazonaws.com/id/56FCEDD35282D4AF2C066D27378C8236 \
+  --client-id-list sts.amazonaws.com \
+  --thumbprint-list 9e99a48a9960b14926bb7f3b02e22da2b0ab7280
+
+# Create IAM role + attach policy
+aws iam create-role \
+  --role-name devopsshack-ebs-csi-driver-role \
+  --assume-role-policy-document file:///tmp/ebs-csi-trust-policy.json
+
+aws iam attach-role-policy \
+  --role-name devopsshack-ebs-csi-driver-role \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+
+# Update addon with role + resolve conflicts
+aws eks update-addon \
+  --cluster-name devopsshack-cluster \
+  --addon-name aws-ebs-csi-driver \
+  --service-account-role-arn arn:aws:iam::774088392047:role/devopsshack-ebs-csi-driver-role \
+  --region us-east-1 \
+  --resolve-conflicts OVERWRITE</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Final Status</div>
+        <pre>"ACTIVE"</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> EBS CSI addon requires OIDC provider + IAM role with <code>AmazonEBSCSIDriverPolicy</code>. OIDC ID: <code>56FCEDD35282D4AF2C066D27378C8236</code>. Use <code>--resolve-conflicts OVERWRITE</code> if addon stays DEGRADED.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 7 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">7</div>
+      <div class="step-title">kubectl & eksctl Installation</div>
+      <div class="step-status">✅ v1.36.2 · v0.227.0</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash — kubectl</span>
+        <pre>curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+kubectl version --client</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — eksctl</span>
+        <pre>curl --silent --location \
+  "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
+  | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin/
+eksctl version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — connect to cluster</span>
+        <pre>aws eks update-kubeconfig --name devopsshack-cluster --region us-east-1
+kubectl get nodes</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Cluster Health</div>
+        <pre>NAME                         STATUS   ROLES    AGE   VERSION
+ip-10-0-0-151.ec2.internal   Ready    none     11h   v1.35.6-eks-93b80c6
+ip-10-0-0-225.ec2.internal   Ready    none     11h   v1.35.6-eks-93b80c6
+ip-10-0-1-4.ec2.internal     Ready    none     11h   v1.35.6-eks-93b80c6</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 8 -->
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">8</div>
+      <div class="step-title">Helm Installation</div>
+      <div class="step-status">✅ v3.21.2</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Helm is the Kubernetes package manager — used for installing Prometheus, Grafana, ArgoCD, and other tools on EKS.</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Output</div>
+        <pre>version.BuildInfo{Version:"v3.21.2", GitCommit:"125963406833fe0525be91f46c8b5b0f22fb9e32"}</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Note:</strong> Use <code>helm version</code> not <code>helm --version</code> — the <code>--version</code> flag is not supported in Helm.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div id="phase2" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">2</div>
+    <div>
+      <h2>Jenkins Server Setup</h2>
+      <p>Setting up the CI/CD server with Java 21, Jenkins, Docker, Trivy, and kubectl on a dedicated EC2 instance</p>
+    </div>
+    <div class="phase-badge">✅ 6/6 Complete</div>
+  </div>
+
+  <div class="server-grid">
+    <div class="server-card jenkins">
+      <div class="server-title">jenkins_server</div>
+      <div class="server-ip">54.83.65.92</div>
+      <div class="server-info">
+        Instance: i-0b89ea6754ca63c0a<br>
+        Type: c7i-flex.large<br>
+        OS: Ubuntu 26.04<br>
+        Private IP: 172.31.21.35<br>
+        Jenkins URL: :8080
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">Java 21 Installation</div>
+      <div class="step-status">✅ v21.0.11</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Jenkins 2.555.3 requires Java 21 minimum. Java 17 was installed first but Jenkins refused to start — upgraded to Java 21.</div>
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>sudo apt install -y openjdk-21-jre openjdk-21-jdk
+sudo update-alternatives --config java
+java -version
+javac -version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Output</div>
+        <pre>openjdk version "21.0.11" 2026-04-21
+OpenJDK Runtime Environment (build 21.0.11+10-1-26.04.2-Ubuntu)
+javac 21.0.11</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Jenkins 2.555.3 requires Java 21+ minimum. Java 17 fails with "older than minimum required version". Always install JDK (not just JRE) so <code>javac</code> is available for Maven compilation.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div class="step-title">Jenkins Installation</div>
+      <div class="step-status">✅ v2.555.3</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Jenkins installed using the 2026 key — the 2023 key fails on Ubuntu 26.04 Resolute with GPG verification error.</div>
+      <div class="code-block">
+        <span class="code-label">bash — working method for Ubuntu 26.04</span>
+        <pre>sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt update && sudo apt install jenkins -y
+sudo systemctl start jenkins
+sudo systemctl enable jenkins
+sudo systemctl status jenkins</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — initial password</span>
+        <pre>sudo cat /var/lib/jenkins/secrets/initialAdminPassword</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Use <code>jenkins.io-2026.key</code> (NOT <code>jenkins.io-2023.key</code>) for Ubuntu 26.04 Resolute. The 2023 key gives <code>NO_PUBKEY 7198F4B714ABFC68</code> error.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div class="step-title">Docker Installation</div>
+      <div class="step-status">✅ v29.1.3</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>sudo apt install docker.io -y
+sudo usermod -aG docker jenkins
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+docker --version</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — daemon.json for Nexus registry</span>
+        <pre>sudo bash -c 'cat > /etc/docker/daemon.json << EOF
+{
+  "insecure-registries": ["34.207.149.11:8081"]
+}
+EOF'
+sudo systemctl restart docker
+sudo systemctl restart jenkins</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Add <code>jenkins</code> AND <code>ubuntu</code> to docker group. Restart Jenkins after Docker restart. Configure <code>daemon.json</code> for insecure registries before running pipeline.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">4</div>
+      <div class="step-title">Trivy Installation</div>
+      <div class="step-status">✅ v0.71.2</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+  | sudo sh -s -- -b /usr/local/bin
+trivy --version
+
+# Setup cache directories (IMPORTANT — avoids /tmp space issues)
+sudo mkdir -p /var/lib/jenkins/trivy-cache
+sudo mkdir -p /var/lib/jenkins/trivy-tmp
+sudo chown jenkins:jenkins /var/lib/jenkins/trivy-cache
+sudo chown jenkins:jenkins /var/lib/jenkins/trivy-tmp</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Trivy Java DB is 884MB. The <code>/tmp</code> partition is only 1.9GB total — fills up during download. Always use <code>--cache-dir /var/lib/jenkins/trivy-cache</code> and <code>export TMPDIR=/var/lib/jenkins/trivy-tmp</code>. Also use <code>--scanners vuln</code> to skip the Java DB entirely.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">5</div>
+      <div class="step-title">kubectl Installation on Jenkins</div>
+      <div class="step-status">✅ v1.36.2</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash</span>
+        <pre>curl -LO "https://dl.k8s.io/release/$(curl -L -s \
+  https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+kubectl version --client</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">6</div>
+      <div class="step-title">Jenkins Plugins Installation</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Install all required plugins via Jenkins UI: <code>http://54.83.65.92:8080</code> → Manage Jenkins → Plugins → Available</div>
+      <div class="tags">
+        <span class="tag">Pipeline Graph Analysis</span>
+        <span class="tag">SonarQube Scanner</span>
+        <span class="tag">Docker Pipeline</span>
+        <span class="tag">Docker Commons</span>
+        <span class="tag">Kubernetes CLI</span>
+        <span class="tag">Kubernetes Credentials</span>
+        <span class="tag">Kubernetes Client API</span>
+        <span class="tag">Maven Integration</span>
+        <span class="tag">Config File Provider</span>
+        <span class="tag">Pipeline Maven Integration</span>
+        <span class="tag">Authentication Tokens API</span>
+      </div>
+      <div class="section-title">Jenkins Credentials</div>
+      <table class="info-table">
+        <tr><th>ID</th><th>Type</th><th>Purpose</th></tr>
+        <tr><td><code>git</code></td><td>Username/Password</td><td>GitHub access — Jayprakash-A06</td></tr>
+        <tr><td><code>sonar-token</code></td><td>Secret Text</td><td>SonarQube authentication token</td></tr>
+        <tr><td><code>nexus-docker-id</code></td><td>Username/Password</td><td>Nexus registry — admin/admin@123</td></tr>
+        <tr><td><code>docker-hub-cred</code></td><td>Username/Password</td><td>Docker Hub — jayanchule0699</td></tr>
+        <tr><td><code>k8s-token</code></td><td>Secret Text</td><td>EKS Jenkins SA token</td></tr>
+        <tr><td><code>devopsshack</code></td><td>Config File</td><td>Maven global settings for Nexus</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div id="phase3" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">3</div>
+    <div>
+      <h2>SonarQube & Nexus Setup</h2>
+      <p>Running SonarQube for code quality analysis and Nexus for artifact storage as Docker containers</p>
+    </div>
+    <div class="phase-badge">✅ Complete</div>
+  </div>
+
+  <div class="server-grid">
+    <div class="server-card sonar">
+      <div class="server-title">sonarqube_server</div>
+      <div class="server-ip">3.89.255.48</div>
+      <div class="server-info">
+        Instance: i-05ac71d5e4ecedbe4<br>
+        Type: c7i-flex.large<br>
+        Docker: v29.1.3<br>
+        Container: sonar<br>
+        Port: 9000
+      </div>
+    </div>
+    <div class="server-card nexus">
+      <div class="server-title">nexus_server</div>
+      <div class="server-ip">34.207.149.11</div>
+      <div class="server-info">
+        Instance: i-02c41e1d3931d11bc<br>
+        Type: c7i-flex.large<br>
+        Docker: v29.1.3<br>
+        Container: nexus<br>
+        Port: 8081
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">SonarQube Container</div>
+      <div class="step-status">✅ Running</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash — on sonarqube_server</span>
+        <pre>sudo apt install docker.io -y
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run -d --name sonar \
+  -p 9000:9000 \
+  sonarqube:lts-community
+
+docker ps</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Access Details</div>
+        <pre>URL: http://3.89.255.48:9000
+Default: admin / admin (change on first login)
+Image: sonarqube:lts-community (sha256:f709975a)</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Change default password on first login. Generate a token for Jenkins: My Account → Security → Generate Token → copy it → add to Jenkins as <code>sonar-token</code> credential. Update SonarQube Server Base URL after EC2 restart — IP changes!
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div class="step-title">Nexus Container</div>
+      <div class="step-status">✅ Running</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash — on nexus_server</span>
+        <pre>sudo apt install docker.io -y
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run -d --name nexus \
+  -p 8081:8081 \
+  -p 8083:8083 \
+  sonatype/nexus3
+
+# Get initial admin password
+docker exec nexus cat /nexus-data/admin.password</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Access Details</div>
+        <pre>URL: http://34.207.149.11:8081
+Password: admin@123 (set during first login)
+Maven Releases repo: maven-releases
+Maven Snapshots repo: maven-snapshots</pre>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Enable <strong>Docker Bearer Token Realm</strong> in Security → Realms. Initial password is in <code>/nexus-data/admin.password</code> — deleted after first login. Nexus path-based Docker routing (port 8081) doesn't support Docker push (405 error) — use Docker Hub instead for image storage.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div class="step-title">Jenkins → SonarQube Configuration</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Configure SonarQube server in Jenkins and set up webhook for Quality Gate feedback.</div>
+      <table class="info-table">
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Jenkins → Manage Jenkins → System → SonarQube</td><td>Name: <code>sonar</code>, URL: <code>http://3.89.255.48:9000</code></td></tr>
+        <tr><td>SonarQube Webhook</td><td><code>http://54.83.65.92:8080/sonarqube-webhook/</code></td></tr>
+        <tr><td>Jenkins URL</td><td>Manage Jenkins → Configure System → Jenkins URL</td></tr>
+      </table>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> After every EC2 restart, update: (1) Jenkins URL in Manage Jenkins → Configure System, (2) SonarQube webhook URL, (3) SonarQube Server Base URL in Administration → General. IP changes on every restart unless Elastic IP is used.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 4 -->
+<div id="phase4" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">4</div>
+    <div>
+      <h2>EKS RBAC Configuration</h2>
+      <p>Setting up Role-Based Access Control on EKS for the Jenkins service account in the webapps namespace</p>
+    </div>
+    <div class="phase-badge">✅ Complete</div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">Create Namespace & Apply RBAC Files</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash — on infra server</span>
+        <pre>kubectl create namespace webapps
+
+kubectl apply -f sa.yaml        # ServiceAccount
+kubectl apply -f role.yaml      # Role (namespace scoped)
+kubectl apply -f rb.yaml        # RoleBinding
+kubectl apply -f cr.yaml        # ClusterRole (cluster scoped)
+kubectl apply -f crb.yaml       # ClusterRoleBinding
+kubectl apply -f sec.yaml       # Secret (SA token)</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">yaml — sec.yaml (token)</span>
+        <pre>apiVersion: v1
+kind: Secret
+metadata:
+  name: jenkins-token
+  namespace: webapps
+  annotations:
+    kubernetes.io/service-account.name: jenkins
+type: kubernetes.io/service-account-token</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="code-block">
+        <span class="code-label">bash — get token for Jenkins</span>
+        <pre>kubectl describe secret jenkins-token -n webapps</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Focus:</strong> Create namespace BEFORE applying any YAML files — all files reference <code>namespace: webapps</code>. The <code>cat >> file</code> append method cuts off content if Ctrl+C is pressed — use <code>cat > file &lt;&lt; 'EOF'</code> instead. Always verify with <code>cat filename</code> after creation.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div class="step-title">Verify RBAC Setup</div>
+      <div class="step-status">✅ Verified</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">bash — verification</span>
+        <pre>kubectl get sa -n webapps
+kubectl get role -n webapps
+kubectl get rolebinding -n webapps
+kubectl get clusterrole | grep jenkins
+kubectl get clusterrolebinding | grep jenkins
+
+# Test permissions
+kubectl auth can-i create deployments \
+  --as=system:serviceaccount:webapps:jenkins -n webapps</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <div class="output-block">
+        <div class="output-label">Expected Output</div>
+        <pre>NAME     AGE
+jenkins  14h
+
+NAME          CREATED AT
+jenkins-role  2026-06-23T03:14:44Z
+
+NAME                 ROLE
+jenkins-rolebinding  Role/jenkins-role
+
+jenkins-cluster-role
+jenkins-cluster-rolebinding  ClusterRole/jenkins-cluster-role</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 5 -->
+<div id="phase5" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">5</div>
+    <div>
+      <h2>CI Pipeline — Jenkins</h2>
+      <p>11-stage CI pipeline: compile, test, security scan, quality gate, build, artifact publish, Docker build/scan/push</p>
+    </div>
+    <div class="phase-badge">✅ Running</div>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-flow">
+      <div class="pipe-step done">Java Check</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Git Checkout</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Compile</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Test</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Trivy FS</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Sonar</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Quality Gate</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Build JAR</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Nexus Deploy</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Docker Build</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Trivy Image</div><div class="pipe-arrow">→</div>
+      <div class="pipe-step done">Docker Push</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">Final Working Jenkinsfile</div>
+      <div class="step-status">✅ Working</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">groovy — Jenkinsfile</span>
+        <pre>pipeline {
+    agent any
+    tools {
+        jdk 'jdk21'
+        maven 'maven3'
+    }
+    environment {
+        IMAGE_NAME = "jayanchule0699/bankapp"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
+    }
+    stages {
+        stage('Check Java Version') {
+            steps {
+                sh '''
+                echo "JAVA_HOME=$JAVA_HOME"
+                java -version && javac -version && mvn -version
+                '''
+            }
+        }
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'git',
+                    url: 'https://github.com/Jayprakash-A06/mega_project_ci.git'
+            }
+        }
+        stage('Compile') { steps { sh "mvn compile" } }
+        stage('Testing') { steps { sh "mvn test" } }
+        stage('Trivy FS Scan') {
+            steps {
+                sh '''
+                trivy fs --exit-code 0 --format table -o fs-report.txt .
+                echo "Trivy Exit Code = $?"
+                '''
+            }
+        }
+        stage('Sonar Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''mvn clean verify sonar:sonar \
+                      -Dsonar.projectKey=gcbank \
+                      -Dsonar.projectName=gcbank \
+                      -Dsonar.java.binaries=target'''
+                }
+            }
+        }
+        stage('Quality Gate Check') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: false,
+                    credentialsId: 'sonar-token'
+                }
+            }
+        }
+        stage('Build') { steps { sh "mvn package" } }
+        stage('Publish To Nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'devopsshack',
+                          jdk: '', maven: 'maven3', mavenSettingsConfig: '') {
+                    sh "mvn deploy"
+                }
+            }
+        }
+        stage('Docker Image Build & Tag') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-hub-cred', url: '') {
+                        sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                        sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+        stage('Trivy Image Scan') {
+            steps {
+                sh """
+                export TMPDIR=/var/lib/jenkins/trivy-tmp
+                trivy image \
+                  --exit-code 0 --format table \
+                  --cache-dir /var/lib/jenkins/trivy-cache \
+                  --scanners vuln \
+                  -o image-report.txt \
+                  ${IMAGE_NAME}:${IMAGE_TAG}
+                """
+            }
+        }
+        stage('Docker Image Push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-hub-cred', url: '') {
+                        sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+    }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 6 -->
+<div id="phase6" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">6</div>
+    <div>
+      <h2>CD Pipeline & GitOps</h2>
+      <p>Continuous delivery using ArgoCD watching the manifest repo — auto-deploys to EKS when manifest.yaml changes</p>
+    </div>
+    <div class="phase-badge">✅ Complete</div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">CD Repo & Manifest Files</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="step-desc">Created separate CD repo <code>Jayprakash-A06/mega_project_cd</code> with Kubernetes manifest files in <code>Manifest/</code> folder.</div>
+      <div class="tags">
+        <span class="tag">Manifest/manifest.yaml</span>
+        <span class="tag">Manifest/HPA.yaml</span>
+        <span class="tag">Manifest/ingress.yaml</span>
+        <span class="tag">Manifest/ci.yaml</span>
+      </div>
+      <div class="focus-note">
+        <strong>📌 GitOps Pattern:</strong> CI repo (<code>mega_project_ci</code>) has app code + Jenkinsfile. CD repo (<code>mega_project_cd</code>) has K8s manifests. Jenkins updates manifest on every build. ArgoCD watches CD repo and deploys to EKS automatically.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div class="step-title">Jenkins CD Stage — Update Manifest</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <span class="code-label">groovy — add after Docker Push stage</span>
+        <pre>stage('Update Manifest & Trigger CD') {
+    steps {
+        script {
+            withCredentials([usernamePassword(
+                credentialsId: 'git',
+                usernameVariable: 'GIT_USERNAME',
+                passwordVariable: 'GIT_PASSWORD'
+            )]) {
+                sh '''
+                    git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Jayprakash-A06/mega_project_cd.git
+                    cd mega_project_cd
+                    sed -i "s|jayanchule0699/bankapp:.*|jayanchule0699/bankapp:${BUILD_NUMBER}|" Manifest/manifest.yaml
+                    git config user.name "Jayprakash-A06"
+                    git config user.email "deepjyoti2866@gmail.com"
+                    git add Manifest/manifest.yaml
+                    git commit -m "Update image tag to ${BUILD_NUMBER}"
+                    git push origin main
+                '''
+            }
+        }
+    }
+}</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div class="step-title">manifest.yaml Key Details</div>
+      <div class="step-status">✅ Done</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <table class="info-table">
+        <tr><th>Resource</th><th>Details</th></tr>
+        <tr><td>MySQL Secret</td><td>Password: <code>Test@123</code> (Base64: VGVzdEAxMjM=)</td></tr>
+        <tr><td>MySQL Database</td><td><code>bankappdb</code></td></tr>
+        <tr><td>StorageClass</td><td><code>ebs-sc</code> — gp3, EBS CSI provisioner</td></tr>
+        <tr><td>MySQL PVC</td><td>5Gi ReadWriteOnce</td></tr>
+        <tr><td>BankApp Image</td><td><code>jayanchule0699/bankapp:latest</code></td></tr>
+        <tr><td>BankApp Port</td><td>8080 (container) → 80 (service)</td></tr>
+        <tr><td>Namespace</td><td><code>webapps</code></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 7 -->
+<div id="phase7" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">7</div>
+    <div>
+      <h2>Monitoring Stack</h2>
+      <p>Prometheus + Grafana + Node Exporter + Blackbox Exporter deployed on EKS via Helm</p>
+    </div>
+    <div class="phase-badge">✅ Live</div>
+  </div>
+
+  <div class="step">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div class="step-title">Live Monitoring Endpoints</div>
+      <div class="step-status">✅ Running</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="endpoint-card">
+        <div class="endpoint-dot"></div>
+        <div class="endpoint-name">Prometheus</div>
+        <div class="endpoint-url">http://ae59922a8fa5c423387cd4a7739f903b-1773710415.us-east-1.elb.amazonaws.com:9090/query</div>
+      </div>
+      <div class="endpoint-card">
+        <div class="endpoint-dot"></div>
+        <div class="endpoint-name">Grafana</div>
+        <div class="endpoint-url">http://ab3048119f52b484db60442444b53a42-1750590644.us-east-1.elb.amazonaws.com/?orgId=1</div>
+      </div>
+      <div class="focus-note">
+        <strong>📌 Monitoring Stack includes:</strong> Prometheus (metrics collection), Grafana (dashboards), Node Exporter (node-level metrics on all 3 EKS nodes), Blackbox Exporter (endpoint health monitoring).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RCA -->
+<div id="rca" class="phase">
+  <div class="phase-header">
+    <div class="phase-num">!</div>
+    <div>
+      <h2>Root Cause Analysis — Issues & Fixes</h2>
+      <p>8 real-world issues encountered and resolved during this project — valuable for interviews and future reference</p>
+    </div>
+    <div class="phase-badge">✅ All Resolved</div>
+  </div>
+
+  <div class="rca-grid">
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 01</div>
+      <div class="rca-title">Maven Not Found</div>
+      <div class="rca-error">mvn: command not found</div>
+      <div class="rca-fix">Fix: sudo apt install maven → Configure in Jenkins Tools → maven3</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 02</div>
+      <div class="rca-title">JDK Missing (javac not found)</div>
+      <div class="rca-error">javac: command not found</div>
+      <div class="rca-fix">Fix: sudo apt install openjdk-21-jdk (JRE was installed, not JDK)</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 03</div>
+      <div class="rca-title">Jenkins Wrong Java</div>
+      <div class="rca-error">Jenkins using Java 17, needs Java 21+</div>
+      <div class="rca-fix">Fix: Configure JDK in Manage Jenkins → Tools → jdk21</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 04</div>
+      <div class="rca-title">Trivy /tmp Space Error</div>
+      <div class="rca-error">no space left on device (/tmp = 1.9GB)</div>
+      <div class="rca-fix">Fix: --cache-dir /var/lib/jenkins/trivy-cache + TMPDIR + --scanners vuln</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 05</div>
+      <div class="rca-title">SonarQube Scanner Wrong</div>
+      <div class="rca-error">Unknown lifecycle phase "sonar-scanner"</div>
+      <div class="rca-fix">Fix: sonar-scanner → mvn sonar:sonar (Maven goal not CLI)</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 06</div>
+      <div class="rca-title">Quality Gate Hanging</div>
+      <div class="rca-error">Webhook pointing to old IP after EC2 restart</div>
+      <div class="rca-fix">Fix: Update webhook URL + Jenkins URL + SonarQube Server Base URL</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 07</div>
+      <div class="rca-title">Malformed settings.xml</div>
+      <div class="rca-error">Non-parseable settings.xml at line 140</div>
+      <div class="rca-fix">Fix: Removed extra "-->" after &lt;/server&gt; in Managed File</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 08</div>
+      <div class="rca-title">Docker Push 405 Error</div>
+      <div class="rca-error">405 HTTP method POST not supported (Nexus path-based)</div>
+      <div class="rca-fix">Fix: Switched to Docker Hub (jayanchule0699) — Nexus for Maven only</div>
+    </div>
+  </div>
+
+  <div class="section-title">Additional EKS & Terraform Issues</div>
+  <div class="rca-grid">
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 09</div>
+      <div class="rca-title">EKS Node Group CREATE_FAILED</div>
+      <div class="rca-error">t2.medium not eligible / InvalidParameterCombination</div>
+      <div class="rca-fix">Fix: Changed instance_types from t2.medium → c7i-flex.large in main.tf</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 10</div>
+      <div class="rca-title">EBS CSI Driver DEGRADED</div>
+      <div class="rca-error">Addon stuck in DEGRADED state — timeout after 20mins</div>
+      <div class="rca-fix">Fix: Create OIDC provider + IAM role + --resolve-conflicts OVERWRITE</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 11</div>
+      <div class="rca-title">Terraform Apply Interrupted</div>
+      <div class="rca-error">Ctrl+C during node group creation — tainted resources</div>
+      <div class="rca-fix">Fix: terraform destroy then terraform apply — use tmux to prevent Ctrl+C</div>
+    </div>
+    <div class="rca-card resolved">
+      <div class="rca-num">ISSUE 12</div>
+      <div class="rca-title">Docker Token Insufficient Scope</div>
+      <div class="rca-error">authentication required - access token has insufficient scopes</div>
+      <div class="rca-fix">Fix: Docker Hub token was Read-only → changed to Read/Write/Delete</div>
+    </div>
+  </div>
+
+  <div class="focus-note" style="margin-top: 20px;">
+    <strong>📌 Interview Ready:</strong> These 12 real-world issues make excellent interview answers for "Tell me about a CI/CD problem you faced and how you resolved it." You personally debugged and fixed every single one of these on a production-like AWS environment.
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<footer>
+  <p>CloudForge E2E DevSecOps Project · Jayprakash-A06 · AWS Account 774088392047 · us-east-1</p>
+  <p style="margin-top: 8px;">Spring Boot Banking App · EKS v1.35 · Jenkins 2.555.3 · SonarQube 9.9.8 · Terraform v1.15.6 · Helm v3.21.2</p>
+</footer>
+
+<script>
+  function showPhase(id) {
+    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const idx = ['overview','phase1','phase2','phase3','phase4','phase5','phase6','phase7','rca'].indexOf(id);
+    document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleStep(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.step-chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.textContent = isOpen ? '▼' : '▲';
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.textContent).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+</body>
+</html>
